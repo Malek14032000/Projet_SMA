@@ -1,0 +1,4 @@
+mesa==3.10
+seaborn
+numpy
+matplotlib
