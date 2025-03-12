@@ -1,6 +1,7 @@
 from mesa import Agent, Model
 from pydantic import BaseModel
 from typing import Tuple, List
+import random
 
 class Knowledge(BaseModel):
    position:Tuple[int, int]
@@ -51,15 +52,28 @@ class Robot(Agent):
        pass
 
 class greenAgent(Robot):
-    def __init__(self, model:Model, knowledge:Knowledge):
-      super().__init__(model, knowledge)
-
+    def __init__(self, model: Model):
+        width, height = model.width, model.height
+        my_zone = (0, width // 3 - 1, 0, height - 1)
+        allowed_zone = (0, width // 3 - 1, 0, height - 1)
+        position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
+        knowledge = Knowledge(position=position, target_positions=[], my_zone=my_zone, allowed_zone=allowed_zone, carrying=0)
+        super().__init__(model, knowledge)
 
 class yellowAgent(Robot):
-    def __init__(self, model:Model, knowledge:Knowledge):
-      super().__init__(model, knowledge)
- 
+    def __init__(self, model: Model):
+        width, height = model.width, model.height
+        my_zone = (width // 3, 2 * width // 3 - 1, 0, height - 1)
+        allowed_zone = (0, 2 * width // 3 - 1, 0, height - 1)
+        position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
+        knowledge = Knowledge(position=position, target_positions=[], my_zone=my_zone, allowed_zone=allowed_zone, carrying=0)
+        super().__init__(model, knowledge)
 
 class redAgent(Robot):
-    def __init__(self, model:Model, knowledge:Knowledge):
-      super().__init__(model, knowledge)
+    def __init__(self, model: Model):
+        width, height = model.width, model.height
+        my_zone = (2 * width // 3, width - 1, 0, height - 1)
+        allowed_zone = (0, width - 1, 0, height - 1)
+        position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
+        knowledge = Knowledge(position=position, target_positions=[], my_zone=my_zone, allowed_zone=allowed_zone, carrying=0)
+        super().__init__(model, knowledge)
