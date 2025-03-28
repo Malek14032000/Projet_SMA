@@ -11,22 +11,24 @@ class Knowledge(BaseModel):
    carrying:int # 0 if nothing, 
                 # 1 if carrying one of the robot's own color,
                 # 2 if carrying one of the next color
+   percepts:List[str] # list of percepts
+   actions:List[str]# list of actions
 
 class Robot(Agent):
     def __init__(self, model:Model, knowledge:Knowledge):
       super().__init__(model)
       self.knowledge=knowledge
 
-    def update(self):
-       pass
+    def update(self, percepts):
+       self.knowledge.percepts.append(percepts)
 
     def deliberate(self):
-       pass
+       return "MOVE"
 
     def step_agent(self): 
-        self.update() 
-        action = self.deliberate() 
-        self.model.do(self, action) 
+        action = self.deliberate()
+        percepts = self.model.do(self, action)
+        self.update(percepts)
 
     def get_possible_moves(self):
         possible_moves = []
@@ -45,8 +47,6 @@ class Robot(Agent):
     def move(self):
        possible_moves = self.get_possible_moves()
        new_position = self.random.choice(possible_moves)
-       self.model.grid.place_agent(self, new_position)
-       self.knowledge.position=new_position
        return new_position
 
     def pickup(self):
@@ -59,16 +59,13 @@ class Robot(Agent):
         pass
 
 
-
-
-
 class greenAgent(Robot):
     def __init__(self, model: Model):
         width, height = model.width, model.height
         my_zone = (0, width // 3 - 1, 0, height - 1)
         allowed_zone = (0, width // 3 - 1, 0, height - 1)
         position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
-        knowledge = Knowledge(position=position, target_positions=[], my_zone=my_zone, allowed_zone=allowed_zone, carrying=0)
+        knowledge = Knowledge(position=position, target_positions=[], my_zone=my_zone, allowed_zone=allowed_zone, carrying=0, percepts=[], actions=[])
         super().__init__(model, knowledge)
 
 class yellowAgent(Robot):
@@ -77,7 +74,7 @@ class yellowAgent(Robot):
         my_zone = (width // 3, 2 * width // 3 - 1, 0, height - 1)
         allowed_zone = (0, 2 * width // 3 - 1, 0, height - 1)
         position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
-        knowledge = Knowledge(position=position, target_positions=[], my_zone=my_zone, allowed_zone=allowed_zone, carrying=0)
+        knowledge = Knowledge(position=position, target_positions=[], my_zone=my_zone, allowed_zone=allowed_zone, carrying=0, percepts=[], actions=[])
         super().__init__(model, knowledge)
 
 class redAgent(Robot):
@@ -86,5 +83,5 @@ class redAgent(Robot):
         my_zone = (2 * width // 3, width - 1, 0, height - 1)
         allowed_zone = (0, width - 1, 0, height - 1)
         position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
-        knowledge = Knowledge(position=position, target_positions=[], my_zone=my_zone, allowed_zone=allowed_zone, carrying=0)
+        knowledge = Knowledge(position=position, target_positions=[], my_zone=my_zone, allowed_zone=allowed_zone, carrying=0, percepts=[], actions=[])
         super().__init__(model, knowledge)

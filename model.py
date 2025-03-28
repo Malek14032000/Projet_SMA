@@ -68,8 +68,8 @@ class RobotMission(Model):
             agent.putdown()
             
         percepts = {
-                    neighbor_pos: [obj for obj in self.grid.get_cell_list_contents(neighbor_pos)]
-                    for neighbor_pos in self.grid.iter_neighbors(new_position, moore=True, include_center=True)
+                    neighbor_pos: [obj for obj in self.grid.get_cell_list_contents([neighbor_pos])]
+                    for neighbor_pos in self.grid.get_neighborhood(new_position, moore=True, include_center=True)
                 }
         
         return percepts
