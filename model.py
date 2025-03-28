@@ -1,6 +1,6 @@
 from mesa import Model
 from mesa.space import MultiGrid
-from agents import greenAgent, yellowAgent, redAgent
+from agents import greenAgent, yellowAgent, redAgent, Robot, CODE_COLOR, COLOR_CODE
 from objects import Radioactivity, WasteDisposalZone, Waste
 from random import random
 
@@ -29,8 +29,14 @@ class RobotMission(Model):
                 self.grid.place_agent(agent, agent.knowledge.position)
         
         ## place waste
-        for _ in range(self.num_waste):
-            agent = Waste(self)
+        for _ in range(self.num_waste//3):
+            agent = Waste(self, 'green')
+            self.grid.place_agent(agent, agent.position)
+        for _ in range(self.num_waste//3, 2*self.num_waste//3):
+            agent = Waste(self, 'yellow')
+            self.grid.place_agent(agent, agent.position)
+        for _ in range(2*self.num_waste//3, self.num_waste):
+            agent = Waste(self, 'red')
             self.grid.place_agent(agent, agent.position)
             
         ## place waste disposal zone
@@ -47,28 +53,50 @@ class RobotMission(Model):
                 else:
                     self.grid.place_agent(Radioactivity(self, (x,y), "red"), (x,y))
             
-
     def step(self):
         self.agents.shuffle_do("step_agent")
         
-        
-    def do(self, agent, action):
-        if action == "MOVE":
-            # check if it is feasible
-            new_position = agent.move()
-            if new_position is not None:
-                self.grid.move_agent(agent, new_position)
-                agent.knowledge.position = new_position
-                                
-        elif action == "PICKUP":
-            agent.pickup()
+    #  inform the environment of its actions
+    def do(self, agent:Robot, action):                 
+        if action == "PICKUP":
+            contents = self.grid.get_cell_list_contents([agent.knowledge.position])
+            waste = [w for w in contents if isinstance(w, Waste) and w.radioactivity_level==agent.color]
+            if len(waste)>0 and agent.available:
+                agent.pickup(waste[0])
+
         elif action == "TRANSFORM":
-            agent.transform()
-        elif action == "PUTDOWN":
+            waste1, waste2= agent.waste_carried
+            assert waste1.radioactivity_level==agent.color and waste2.radioactivity_level==agent.color  
+            for w in agent.waste_carried:
+                self.grid.remove_agent(w)
+                new_waste = Waste(self, CODE_COLOR[1 + COLOR_CODE[agent.color]])
+                self.grid.place_agent(new_waste, agent.knowledge.position)
+                agent.transform(new_waste)
+
+        if action == "PUTDOWN":
             agent.putdown()
-            
+        
+        new_position=None
+        if action == "MOVE":
+            new_position = agent.move()
+        x,y=agent.knowledge.position
+        if action == "MOVE RIGHT":
+            new_position = (x+1, y)
+        if action == "MOVE LEFT":
+            new_position = (x-1, y)
+        if action == "MOVE DOWN":
+            new_position = (x, y-1)
+        if action == "MOVE UP":
+            new_position = (x, y+1)
+        
+        if new_position in agent.get_possible_moves():
+            self.grid.move_agent(agent, new_position)
+            agent.knowledge.position=new_position
+            for obj in agent.waste_carried:
+                self.grid.move_agent(obj, new_position)
+                  
         percepts = {
-                    neighbor_pos: [obj for obj in self.grid.get_cell_list_contents([neighbor_pos])]
+                    neighbor_pos: [obj.color for obj in self.grid.get_cell_list_contents([neighbor_pos]) if isinstance(obj, Waste)]
                     for neighbor_pos in self.grid.get_neighborhood(new_position, moore=True, include_center=True)
                 }
         

@@ -45,11 +45,21 @@ def agent_portrayal(agent):
         size = 1650
         marker = "s"
         zorder = 1 
-    else:
-        color = "#000000"
+    
+    elif isinstance(agent, Waste):
+        radioactivity_level = agent.radioactivity_level
+        if radioactivity_level=='green':
+            color = "#2FF924;"
+        if radioactivity_level=='yellow':
+            color = "#AC9F3C"
+        if radioactivity_level=='red':
+            color = "#EB212E"
         size = 60
         marker = "s"
         zorder = 1 
+    
+    else:
+        raise Exception(f"Unknown Object {type(agent)}")
 
     return {"size": size, "color": color, "marker": marker, "zorder": zorder}
 
