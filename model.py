@@ -52,8 +52,27 @@ class RobotMission(Model):
         self.agents.shuffle_do("step_agent")
         
         
-    def do (self, agent, action):
-        pass
+    def do(self, agent, action):
+        if action == "MOVE":
+            # check if it is feasible
+            new_position = agent.move()
+            if new_position is not None:
+                self.grid.move_agent(agent, new_position)
+                agent.knowledge.position = new_position
+                                
+        elif action == "PICKUP":
+            agent.pickup()
+        elif action == "TRANSFORM":
+            agent.transform()
+        elif action == "PUTDOWN":
+            agent.putdown()
+            
+        percepts = {
+                    neighbor_pos: [obj for obj in self.grid.get_cell_list_contents(neighbor_pos)]
+                    for neighbor_pos in self.grid.iter_neighbors(new_position, moore=True, include_center=True)
+                }
+        
+        return percepts
 
 
     def get_all_agents_positions(self):

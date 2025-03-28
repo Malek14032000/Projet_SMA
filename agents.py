@@ -47,9 +47,20 @@ class Robot(Agent):
        new_position = self.random.choice(possible_moves)
        self.model.grid.place_agent(self, new_position)
        self.knowledge.position=new_position
+       return new_position
 
     def pickup(self):
        pass
+   
+    def transform(self):
+        pass
+    
+    def putdown(self):
+        pass
+
+
+
+
 
 class greenAgent(Robot):
     def __init__(self, model: Model):
