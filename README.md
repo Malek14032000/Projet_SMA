@@ -77,5 +77,5 @@ Once the simulation starts, a browser-based visualization will automatically ope
 ## Contributors
 
 - Ammar Mariem
-- Ben Younes Linas
+- Ben Younes Lina
 - Bouhadida Malek
