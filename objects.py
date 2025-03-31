@@ -26,6 +26,7 @@ class Waste(Agent):
         super().__init__(model)
         width, height = model.width, model.height
         self.radioactivity_level = radioactivity_level
+        self.active = True # is not carried
 
 
         if radioactivity_level == "green":

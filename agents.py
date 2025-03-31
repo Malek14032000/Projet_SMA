@@ -1,5 +1,5 @@
 from mesa import Agent, Model
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Tuple, List
 from objects import Waste
 import numpy as np
@@ -13,7 +13,9 @@ class Knowledge(BaseModel):
    target_positions:np.ndarray
    my_zone:Tuple[int, int, int, int] # x_min, x_end, y_min, y_end
    allowed_zone:Tuple[int, int, int, int]
-   actions:List[str] # list of actions
+   actions:List[str]=[] # list of actions
+   reset_zone:bool=True
+   model_config = ConfigDict(arbitrary_types_allowed=True)
 
 class Robot(Agent):
     def __init__(self, model:Model, knowledge:Knowledge, color):
@@ -64,13 +66,13 @@ class Robot(Agent):
        target_x, target_y = nearest_target
        
        if target_x < x:
-           return 'MOVE UP'
-       elif target_x > x:
-          return 'MOVE DOWN'
-       elif target_y < y:
            return 'MOVE LEFT'
+       elif target_x > x:
+          return 'MOVE RIGHT'
+       elif target_y < y:
+           return 'MOVE DOWN'
        elif target_y > y:
-           return 'MOVE RIGHT'
+           return 'MOVE UP'
             
     def step_agent(self): 
         action = self.deliberate()
@@ -90,15 +92,46 @@ class Robot(Agent):
         if y < y_end:
             possible_moves.append((x, y+1))
         return possible_moves
-        
-    def move(self):
-       possible_moves = self.get_possible_moves()
-       new_position = self.random.choice(possible_moves)
-       return new_position
+     
+    def get_logical_moves(self):
+        possible_moves = []
+        x,y=self.knowledge.position
+        x_min, x_end, y_min, y_end = self.knowledge.my_zone
+        if x >= x_min and self.color!='green':
+            possible_moves.append((x-1, y))
+        elif x > x_min:
+            possible_moves.append((x-1, y))
+        if x < x_end:
+            possible_moves.append((x+1, y))
+        if y > y_min:
+            possible_moves.append((x, y-1))
+        if y < y_end:
+            possible_moves.append((x, y+1))
+        return possible_moves
 
+    def move(self):
+        x, y = self.knowledge.position
+        x_min, x_end, y_min, y_end = self.knowledge.my_zone
+        y_direction = 1 if x%2 else -1
+        x_direction = 1 if self.knowledge.reset_zone else -1
+
+        possible_moves = self.get_logical_moves()
+        candidate = (x, y+y_direction)
+
+        if candidate in possible_moves:
+            return candidate
+        candidate = (x+x_direction, y)
+        if candidate in possible_moves:
+            return candidate
+        
+        self.knowledge.reset_zone = not self.knowledge.reset_zone
+        candidate = (x-x_direction, y)
+        assert candidate in possible_moves
+        return candidate
+        
     def pickup(self, obj):
        self.waste_carried.append(obj)
-       if len(self.waste_carried)==2:
+       if len(self.waste_carried)==2 or self.color=='red':
            self.available=False
            
    
@@ -139,3 +172,41 @@ class redAgent(Robot):
         target_positions = np.zeros((width, height, 3), dtype=int)
         knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone, actions=[])
         super().__init__(model, knowledge, 'red')
+
+    def deliberate(self):
+       x_min, x_end, y_min, y_end = self.knowledge.my_zone
+       waste_disposal = (x_end, (y_end+1)//2)
+       x, y = self.knowledge.position
+
+       if not self.available:
+           if self.knowledge.position == waste_disposal:
+               return 'PUTDOWN'
+           if x<x_end:
+               return 'MOVE RIGHT'
+           if y>waste_disposal[1]:
+               return 'MOVE DOWN'
+           return 'MOVE UP'
+       
+       color_code = COLOR_CODE[self.color]
+       targets = self.knowledge.target_positions[:,:,color_code]
+
+       if targets[x,y]>0:
+          return 'PICKUP'
+       
+       target_positions = np.argwhere(targets > 0)
+
+       if target_positions.size == 0:
+           return 'MOVE'
+       
+       distances = np.abs(target_positions[:, 0] - x) + np.abs(target_positions[:, 1] - y)
+       nearest_target = target_positions[np.argmin(distances)]
+       target_x, target_y = nearest_target
+       
+       if target_x < x:
+           return 'MOVE LEFT'
+       elif target_x > x:
+          return 'MOVE RIGHT'
+       elif target_y < y:
+           return 'MOVE DOWN'
+       elif target_y > y:
+           return 'MOVE UP'
