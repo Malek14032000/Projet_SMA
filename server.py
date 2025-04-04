@@ -65,12 +65,12 @@ def agent_portrayal(agent):
 
 
 model_params = {
-    "n_g": 1,
-    "n_y": 1,
-    "n_r": 1,
-    "n_waste": 12,
-    "width": 10,
-    "height": 10,
+    "n_g": 2,
+    "n_y": 2,
+    "n_r": 2,
+    "n_waste": 50,
+    "width": 15,
+    "height": 15,
 }
 
 

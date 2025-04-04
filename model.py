@@ -83,12 +83,14 @@ class RobotMission(Model):
         
         new_position = self.move_agent(agent, new_position)
         
-        percepts = {
+        percepts_waste = {
                     neighbor_pos: [obj.radioactivity_level for obj in self.grid.get_cell_list_contents([neighbor_pos])
                                    if (isinstance(obj, Waste) and obj.active)]
                     for neighbor_pos in self.grid.get_neighborhood(new_position, moore=False, include_center=True)
                 }
-
+        
+        percepts_agent = [agent, new_position]
+        percepts = {'agent': percepts_agent, 'waste': percepts_waste}
         return percepts
 
     def get_all_agents_positions(self):
@@ -98,6 +100,7 @@ class RobotMission(Model):
         if len(agent.waste_carried)==1:
             waste = agent.waste_carried[0]
             agent.putdown(waste)
+        
         if agent.pos==(self.width-1, self.height//2):
             self.grid.remove_agent(waste)
 
@@ -113,7 +116,7 @@ class RobotMission(Model):
 
     def pickup(self, agent):
         contents = self.grid.get_cell_list_contents([agent.knowledge.position])
-        waste = [w for w in contents if isinstance(w, Waste) and w.radioactivity_level==agent.color]
+        waste = [w for w in contents if isinstance(w, Waste) and w.radioactivity_level==agent.color and w.active]
         if len(waste)>0 and agent.available:
             agent.pickup(waste[0])
             waste[0].active=False

@@ -10,9 +10,10 @@ CODE_COLOR =  {v: k for k, v in COLOR_CODE.items()}
 
 class Knowledge(BaseModel):
    position:Tuple[int, int]
-   target_positions:np.ndarray
+   target_positions:np.ndarray # grid width x grid heigth x 3
    my_zone:Tuple[int, int, int, int] # x_min, x_end, y_min, y_end
    allowed_zone:Tuple[int, int, int, int]
+   available_agents_pos:dict={'green':{}, 'yellow':{}, 'red':{}}
    actions:List[str]=[] # list of actions
    reset_zone:bool=True
    model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -27,12 +28,20 @@ class Robot(Agent):
 
     #  allows the agent to get information from the environment.
     def update(self, percepts):
-        for position, contents in percepts.items():
+        for position, contents in percepts['waste'].items():
             x,y=position
             waste = [0,0,0]
             for agent_color in contents:
                 waste[COLOR_CODE[agent_color]]+=1
             self.knowledge.target_positions[x, y, :] = waste
+        agent, position = percepts['agent']
+        assert isinstance(agent, Robot)
+        
+        if not agent.available:
+            position=None
+        agent_id = agent.unique_id
+        self.knowledge.available_agents_pos[agent.color][agent_id]=position
+        
         
     def is_at_limit(self):
         x,y=self.knowledge.position
@@ -57,7 +66,7 @@ class Robot(Agent):
           return 'PICKUP'
        
        target_positions = np.argwhere(targets > 0)
-
+       
        if target_positions.size == 0:
            return 'MOVE'
        
@@ -73,11 +82,15 @@ class Robot(Agent):
            return 'MOVE DOWN'
        elif target_y > y:
            return 'MOVE UP'
-            
+
     def step_agent(self): 
         action = self.deliberate()
         percepts = self.model.do(self, action)
-        self.update(percepts)
+
+        # Communication with other agents
+        for agent in self.model.agents:
+            if isinstance(agent, Robot):
+                agent.update(percepts)
 
     def get_possible_moves(self):
         possible_moves = []
@@ -92,7 +105,7 @@ class Robot(Agent):
         if y < y_end:
             possible_moves.append((x, y+1))
         return possible_moves
-     
+
     def get_logical_moves(self):
         possible_moves = []
         x,y=self.knowledge.position
@@ -133,8 +146,7 @@ class Robot(Agent):
        self.waste_carried.append(obj)
        if len(self.waste_carried)==2 or self.color=='red':
            self.available=False
-           
-   
+
     def transform(self, new_waste):
         self.waste_carried = [new_waste]
     
@@ -150,7 +162,7 @@ class greenAgent(Robot):
         allowed_zone = (0, width // 3 - 1, 0, height - 1)
         position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
         target_positions = np.zeros((width, height, 3), dtype=int)
-        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone, actions=[])
+        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone)
         super().__init__(model, knowledge, 'green')
 
 class yellowAgent(Robot):
@@ -160,7 +172,7 @@ class yellowAgent(Robot):
         allowed_zone = (0, 2 * width // 3 - 1, 0, height - 1)
         position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
         target_positions = np.zeros((width, height, 3), dtype=int)
-        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone, actions=[])
+        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone)
         super().__init__(model, knowledge, 'yellow')
 
 class redAgent(Robot):
@@ -170,7 +182,7 @@ class redAgent(Robot):
         allowed_zone = (0, width - 1, 0, height - 1)
         position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
         target_positions = np.zeros((width, height, 3), dtype=int)
-        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone, actions=[])
+        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone)
         super().__init__(model, knowledge, 'red')
 
     def deliberate(self):
