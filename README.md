@@ -8,7 +8,6 @@ This project simulates the mission of autonomous robots tasked with collecting, 
 - [Structure](#structure)
 - [Prerequisites](#prerequisites)
 - [Usage](#usage)
-- [License](#license)
 - [Contributors](#contributors)
 
 ## Project Overview
