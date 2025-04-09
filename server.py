@@ -69,20 +69,23 @@ model_params = {
     "n_y": 1,
     "n_r": 1,
     "n_waste": 12,
-    "width": 10,
-    "height": 10,
+    "width": 9,
+    "height": 9,
 }
 
 
-model = RobotMission(1,1,1,12,10,10)
+model = RobotMission(1,1,1,12,9,9)
 
-plt.rcParams["figure.figsize"] = (8, 8)
+plt.rcParams["figure.figsize"] = (7, 7)
 SpaceGraph = make_space_component(agent_portrayal)
+TotalWasteDisposedPlot = make_plot_component("Total_waste_disposed")
+# GreenWasteLeftPlot = make_plot_component("Left_waste_green")
+
 
 # Dashboard
 page = SolaraViz(
     model,
-    components=[SpaceGraph],
+    components=[SpaceGraph, TotalWasteDisposedPlot],
     model_params=model_params,
     name="Self-organization of Robots in a Hostile Environment",
 )
