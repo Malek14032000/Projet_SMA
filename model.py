@@ -3,7 +3,8 @@ from mesa.space import MultiGrid
 from agents import greenAgent, yellowAgent, redAgent, Robot, CODE_COLOR, COLOR_CODE
 from objects import Radioactivity, WasteDisposalZone, Waste
 from random import random
-
+import mesa
+from metrics import *
 
 class RobotMission(Model):
     def __init__(self, n_g, n_y, n_r, n_waste, width=10, height=10, seed=None):
@@ -52,9 +53,16 @@ class RobotMission(Model):
                     self.grid.place_agent(Radioactivity(self, (x,y), "yellow"), (x,y))
                 else:
                     self.grid.place_agent(Radioactivity(self, (x,y), "red"), (x,y))
+        
+        
+        self.datacollector = mesa.DataCollector(
+            model_reporters={"Total_waste_disposed": compute_disposed_waste, "Left_waste_green": lambda m: transformed_waste_in_region(m, 'green')})
+        
+        self.datacollector.collect(self)
             
     def step(self):
         self.agents.shuffle_do("step_agent")
+        self.datacollector.collect(self)
         
     #  inform the environment of its actions
     def do(self, agent:Robot, action):   
@@ -125,7 +133,8 @@ class RobotMission(Model):
         assert len(agent.waste_carried)==2
         for w in agent.waste_carried:
             assert w.radioactivity_level==agent.color
-            self.grid.remove_agent(w)
+            if w.pos is not None:
+                self.grid.remove_agent(w)
         new_waste = Waste(self, CODE_COLOR[1 + COLOR_CODE[agent.color]])
         self.grid.place_agent(new_waste, agent.knowledge.position)
         agent.transform(new_waste)
