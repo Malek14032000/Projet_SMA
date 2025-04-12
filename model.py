@@ -6,8 +6,15 @@ from random import random
 import mesa
 from metrics import *
 
-class RobotMission(Model):
+class RobotMission(mesa.Model):
     def __init__(self, n_g, n_y, n_r, n_waste, width=10, height=10, seed=None):
+        # 🔁 Adapter les paramètres venant de sliders (dicts) ou simples ints
+        if isinstance(n_g, dict): n_g = n_g.get("value", 1)
+        if isinstance(n_y, dict): n_y = n_y.get("value", 1)
+        if isinstance(n_r, dict): n_r = n_r.get("value", 1)
+        if isinstance(n_waste, dict): n_waste = n_waste.get("value", 12)
+        if isinstance(width, dict): width = width.get("value", 9)
+        if isinstance(height, dict): height = height.get("value", 9)
         super().__init__(seed=seed)
         self.width = width 
         self.height = height
@@ -17,7 +24,7 @@ class RobotMission(Model):
         self.num_waste = n_waste
         
         self.grid = MultiGrid(width, height, torus=False)
-        
+        self.space = self.grid
         ## place robots
         agent_mapping = {
             greenAgent: self.num_green_agents,
@@ -55,9 +62,16 @@ class RobotMission(Model):
                     self.grid.place_agent(Radioactivity(self, (x,y), "red"), (x,y))
         
         
+        # self.datacollector = mesa.DataCollector(
+        #     model_reporters={"Total_waste_disposed": compute_disposed_waste, "Left_waste_green": lambda m: transformed_waste_in_region(m, 'green')})
         self.datacollector = mesa.DataCollector(
-            model_reporters={"Total_waste_disposed": compute_disposed_waste, "Left_waste_green": lambda m: transformed_waste_in_region(m, 'green')})
-        
+         model_reporters={
+        "Total_waste_disposed": compute_disposed_waste,
+        "Left_waste_green": lambda m: m.count_waste("green"),
+        "Left_waste_yellow": lambda m: m.count_waste("yellow"),
+        "Left_waste_red": lambda m: m.count_waste("red")
+    }
+)
         self.datacollector.collect(self)
             
     def step(self):
@@ -135,3 +149,10 @@ class RobotMission(Model):
         new_waste = Waste(self, CODE_COLOR[1 + COLOR_CODE[agent.color]])
         self.grid.place_agent(new_waste, agent.knowledge.position)
         agent.transform(new_waste)
+    def count_waste(self, color):
+        count = 0
+        for contents, (x, y) in self.grid.coord_iter():
+            for agent in contents:
+                if isinstance(agent, Waste) and agent.radioactivity_level == color and agent.active:
+                    count += 1
+        return count
