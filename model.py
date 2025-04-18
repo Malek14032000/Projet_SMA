@@ -105,8 +105,9 @@ class RobotMission(Model):
         return [a.knowledge.position for a in self.agents]
     
     def putdown(self, agent):
-        if len(agent.waste_carried)==1:
+        if len(agent.waste_carried)>=1:
             waste = agent.waste_carried[0]
+            waste.active=True
             agent.putdown(waste)
         
         if agent.pos==(self.width-1, self.height//2):
