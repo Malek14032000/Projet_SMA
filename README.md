@@ -84,6 +84,7 @@ In this project, we experimented 3 strategies of agent behaviours. We will expla
 In this first approach, we made following choices:
 - agents move randomly in the grid, while searching for the waste to pick up
 - agents cannot communicate between each other. 
+
 .......
 
 The implementation of this class of agents is `agents.py`, named `Robot`.
@@ -111,10 +112,12 @@ The `Knowledge` class, also present in `agents.py` module, represents the knowle
 
 ### Agents with communication
 
+.....
 
 
 ### Agents with advanced communication
 
+.....
 
 ## Results
 
