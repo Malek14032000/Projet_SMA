@@ -1,22 +1,14 @@
 #### Efficiency / Performance Metrics
 # Total waste disposed through time
-# Time taken to dispose of all waste
 # Total green waste moved through time (or just the time when the green zone is empty)
 # Total yellow waste moved through time (or just the time when the yellow zone is empty)
 # Total red waste moved through time (or just the time when the red zone is empty)
 # Time spent not performing useful work
 
-#### Resource / Load Distribution
-# Waste handled per agent
-# Distance traveled per agent
-# Gini coef of work (Low: tasks fairly distributed. High: inefficiencies / overworked agents.)
-
 #### Robustness
 # Variance across multiple simulation runs
 
 from objects import WasteDisposalZone, Waste
-
-
 
 
 # Total waste disposed through time
