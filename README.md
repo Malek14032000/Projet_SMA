@@ -10,6 +10,7 @@ This project simulates the mission of autonomous robots tasked with collecting, 
 - [Usage](#usage)
 - [Methodology](#methodology)
 - [Results](#results)
+- [Limits & Improvements](#limits)
 - [Contributors](#contributors)
 
 ## Project Overview
@@ -79,25 +80,29 @@ Once the simulation starts, a browser-based visualization will automatically ope
 
 In this project, we experimented 3 strategies of agent behaviours. We will explain each one of them below and present the comparaison results in the next section.
 
-### Agents with no communication, moving randomly
-
-In this first approach, we made following choices:
-- agents move randomly in the grid, while searching for the waste to pick up
-- agents cannot communicate between each other. 
-
-.......
-
-The implementation of this class of agents is `agents.py`, named `Robot`.
-
-The following UML class diagram is explaining the inheritance links between all different types of agents we will present later.
+The following UML class diagram is explains the inheritance links between all different types of agents we will present later. It is the same for the 3 strategies.
 
 ```
-              Agent
-                ↑
               Robot
      ↑          ↑         ↑
 GreenAgent YellowAgent RedAgent
 ```
+
+All moving agents inherent from class `Robot`. This class contains an argument named `strategy` that allows us to choose the strategy `1`, `2` or `3`.
+
+
+### Strategy 1 : Agents with no communication, moving greedily
+
+In this first approach, we made the following choices:
+- agents move greedily in the grid (move to the next column in the grid only after having moved in all cells in the previous column)
+- agents cannot communicate between each other. 
+
+.......
+
+
+
+
+
 
 #### **Agents knowledge**
 The `Knowledge` class, also present in `agents.py` module, represents the knowledge of an agent and its state during the simulation. It has the following attributes:
@@ -110,18 +115,26 @@ The `Knowledge` class, also present in `agents.py` module, represents the knowle
 - `reset_zone`: ...
 - `model_config`: ...
 
-### Agents with communication
+### Strategy 2 : Agents with communication
 
 .....
 
 
-### Agents with advanced communication
+### Strategy 3 : Agents with advanced communication
 
 .....
 
 ## Results
+- to run the simulations, we chose a `batch_size` of 3 in order to take into account the fact the randomness in the placement of the waste as well as the potential randomness in the chosen strategy. so the différence in results may be due to randomness
+- show table
 
 
+
+## Limits & Improvements
+- fixed grid size
+- batch size is low, keep the variance high
+- we can implement and monitor other KPIs, notably the time an agent spent not doing anything. In fact, it depends on our purpose: do we want to clean the map fast or do we want to clean it fast and also not use a lot of energy..
+- same number of waste in the 3 regions. the red one is always loaded compared to the other two
 
 
 ## Contributors
