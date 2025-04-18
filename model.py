@@ -7,7 +7,7 @@ import mesa
 from metrics import *
 
 class RobotMission(Model):
-    def __init__(self, n_g, n_y, n_r, n_waste, width=10, height=10, seed=None):
+    def __init__(self, n_g, n_y, n_r, n_waste, width=10, height=10, seed=None, strategy=2):
         super().__init__(seed=seed)
         self.width = width 
         self.height = height
@@ -26,7 +26,7 @@ class RobotMission(Model):
         }
         for agent_type, num_agents in agent_mapping.items():
             for _ in range(num_agents):
-                agent = agent_type(self)
+                agent = agent_type(self, strategy)
                 self.grid.place_agent(agent, agent.knowledge.position)
         
         ## place waste
@@ -85,9 +85,9 @@ class RobotMission(Model):
             new_position = (x, y-1)
         elif action == "MOVE UP":
             new_position = (x, y+1)
-        else:
+        elif action!="NONE":
             print('No action')
-            raise Exception('no action')
+            raise Exception(f'no action {action}')
         
         new_position = self.move_agent(agent, new_position)
         

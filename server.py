@@ -74,7 +74,13 @@ model_params = {
 }
 
 
-model = RobotMission(1,1,1,12,9,9)
+model = RobotMission(n_g=model_params["n_g"],
+             n_y=model_params["n_y"],
+             n_r=model_params["n_r"],
+             n_waste=model_params["n_waste"],
+             width=model_params["width"],
+             height=model_params["height"],
+             seed=None, strategy=2)
 
 plt.rcParams["figure.figsize"] = (7, 7)
 SpaceGraph = make_space_component(agent_portrayal)
