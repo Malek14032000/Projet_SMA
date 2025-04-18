@@ -26,6 +26,7 @@ class Robot(Agent):
       self.waste_carried=[]
       self.available=True # is carrying at most one waste of their own color
       self.strategy=strategy
+      self.terminated = False
 
     #  allows the agent to get information from the environment.
     def update(self, percepts):
@@ -42,8 +43,7 @@ class Robot(Agent):
             position=None
         agent_id = agent.unique_id
         self.knowledge.available_agents_pos[agent.color][agent_id]=position
-        
-        
+          
     def is_at_limit(self):
         x,y=self.knowledge.position
         x_min, x_end, y_min, y_end = self.knowledge.my_zone
@@ -120,7 +120,6 @@ class Robot(Agent):
             action=self.deliberate_v3()
         return action
 
-
     def deliberate_v2(self):
        if len(self.waste_carried)==2 and self.color!='red':
            return 'TRANSFORM'
@@ -138,22 +137,18 @@ class Robot(Agent):
           return 'PICKUP'
        
        target_positions = np.argwhere(targets > 0)
+       unknown=np.argwhere(targets < 0)
        
-       if target_positions.size == 0:
+       if target_positions.size>0:
+            distances = np.abs(target_positions[:, 0] - x) + np.abs(target_positions[:, 1] - y)
+            nearest_target = target_positions[np.argmin(distances)]
+            return self.go_to(nearest_target)
+       
+       if unknown.size>0 or self.strategy==1:
            return 'MOVE'
        
-       distances = np.abs(target_positions[:, 0] - x) + np.abs(target_positions[:, 1] - y)
-       nearest_target = target_positions[np.argmin(distances)]
-       target_x, target_y = nearest_target
-       
-       if target_x < x:
-           return 'MOVE LEFT'
-       elif target_x > x:
-          return 'MOVE RIGHT'
-       elif target_y < y:
-           return 'MOVE DOWN'
-       elif target_y > y:
-           return 'MOVE UP'
+       return self.gather_remaining_waste()
+
 
     def deliberate_v3(self):
         if len(self.waste_carried)==2:
@@ -177,9 +172,35 @@ class Robot(Agent):
         if assigned_target is not None and not (assigned_target==self.knowledge.position).all():
             return self.go_to(assigned_target)
         
-        return "NONE"
+        return self.gather_remaining_waste()
 
+    def gather_remaining_waste(self):
+        # the grid is known and empty
+        targets = self.knowledge.target_positions[:,:,COLOR_CODE[self.color]]
+        empty = (targets == 0).all()
+        if not empty:
+            return 'NONE'
+    
+        carrying_agents = [agent_id for agent_id, position in \
+             self.knowledge.available_agents_pos[self.color].items() \
+                 if position is None]
+        carrying_agents.sort()
+        if self.unique_id not in carrying_agents:
+            self.terminated=True
+            return 'NONE'
+        idx = carrying_agents.index(self.unique_id)
+        if idx<len(carrying_agents)//2:
+            if self.is_at_limit():
+                self.terminated=True
+                return 'PUTDOWN'
+            return 'MOVE RIGHT'
+        if self.is_at_limit():
+            return 'NONE'
+        return 'MOVE RIGHT'
+        
     def step_agent(self): 
+        if self.terminated:
+            return 'NONE'
         action = self.deliberate()
         percepts = self.model.do(self, action)
         self.update(percepts)
