@@ -90,11 +90,13 @@ The implementation of this class of agents is `agents.py`, named `Robot`.
 
 The following UML class diagram is explaining the inheritance links between all different types of agents we will present later.
 
+```
               Agent
                 ↑
               Robot
      ↑          ↑         ↑
 GreenAgent YellowAgent RedAgent
+```
 
 #### **Agents knowledge**
 The `Knowledge` class, also present in `agents.py` module, represents the knowledge of an agent and its state during the simulation. It has the following attributes:
