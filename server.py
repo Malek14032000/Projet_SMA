@@ -19,7 +19,7 @@ def agent_portrayal(agent):
         }
         return {"size": 800, "color": color_map[type(agent)], "marker": ".", "zorder": 1}
     elif isinstance(agent, WasteDisposalZone):
-        return {"size": 1650, "color": "black", "marker": "s", "zorder": 1}
+        return {"size": 1450, "color": "black", "marker": "s", "zorder": 1}
     elif isinstance(agent, Waste):
         color = {"green": "#2FF924", "yellow": "#AC9F3C", "red": "#EB212E"}[agent.radioactivity_level]
         return {"size": 60, "color": color, "marker": "s", "zorder": 1}
@@ -50,7 +50,7 @@ def WastePlot(model):
     ax.set_xlabel("Step")
     ax.set_ylabel("Quantité")
     ax.legend()
-    ax.grid(True)
+    ax.grid(False)
 
     return solara.FigureMatplotlib(fig)
 
@@ -62,23 +62,19 @@ def Page():
     n_y = solara.use_reactive(1)
     n_r = solara.use_reactive(1)
     n_waste = solara.use_reactive(12)
-    width = solara.use_reactive(9)
-    height = solara.use_reactive(9)
 
     # Paramètres pour le modèle
     model_params = {
         "n_g": n_g,
         "n_y": n_y,
         "n_r": n_r,
-        "n_waste": n_waste,
-        "width": width,
-        "height": height,
+        "n_waste": n_waste
     }
 
     model = solara.use_memo(lambda: RobotMission(
-        n_g.value, n_y.value, n_r.value, n_waste.value, width.value, height.value
-    ), [n_g.value, n_y.value, n_r.value, n_waste.value, width.value, height.value])
-
+        n_g.value, n_y.value, n_r.value, n_waste.value, 12, 12
+    ), [n_g.value, n_y.value, n_r.value, n_waste.value, 12, 12])
+    plt.rcParams["figure.figsize"] = (7, 7)  
     SpaceGraph = make_space_component(agent_portrayal)
 
     with solara.Columns([3, 9]):
@@ -88,8 +84,7 @@ def Page():
             solara.SliderInt("Agents jaunes", value=n_y, min=0, max=10)
             solara.SliderInt("Agents rouges", value=n_r, min=0, max=10)
             solara.SliderInt("Nombre de déchets", value=n_waste, min=0, max=50)
-            solara.SliderInt("Largeur de la grille", value=width, min=5, max=20)
-            solara.SliderInt("Hauteur de la grille", value=height, min=5, max=20)
+
 
         with solara.Column():
             solara.Markdown("### Simulation")
@@ -103,4 +98,4 @@ def Page():
 
 
 
-
+#solara run server.py
