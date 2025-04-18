@@ -10,37 +10,118 @@ CODE_COLOR =  {v: k for k, v in COLOR_CODE.items()}
 
 class Knowledge(BaseModel):
    position:Tuple[int, int]
-   target_positions:np.ndarray
+   target_positions:np.ndarray # grid width x grid heigth x 3
    my_zone:Tuple[int, int, int, int] # x_min, x_end, y_min, y_end
    allowed_zone:Tuple[int, int, int, int]
+   available_agents_pos:dict={'green':{}, 'yellow':{}, 'red':{}}
    actions:List[str]=[] # list of actions
    reset_zone:bool=True
    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 class Robot(Agent):
-    def __init__(self, model:Model, knowledge:Knowledge, color):
+    def __init__(self, model:Model, knowledge:Knowledge, color, strategy=3):
       super().__init__(model)
       self.knowledge=knowledge
       self.color=color
       self.waste_carried=[]
       self.available=True # is carrying at most one waste of their own color
+      self.strategy=strategy
 
     #  allows the agent to get information from the environment.
     def update(self, percepts):
-        for position, contents in percepts.items():
+        for position, contents in percepts['waste'].items():
             x,y=position
             waste = [0,0,0]
             for agent_color in contents:
                 waste[COLOR_CODE[agent_color]]+=1
             self.knowledge.target_positions[x, y, :] = waste
+        agent, position = percepts['agent']
+        assert isinstance(agent, Robot)
+        
+        if not agent.available:
+            position=None
+        agent_id = agent.unique_id
+        self.knowledge.available_agents_pos[agent.color][agent_id]=position
+        
         
     def is_at_limit(self):
         x,y=self.knowledge.position
         x_min, x_end, y_min, y_end = self.knowledge.my_zone
         return x==x_end
-   
+    
+    def target_is_free(self, nearest_target, distance_self, target_positions):
+        for agent_id, position in self.knowledge.available_agents_pos[self.color].items():
+            if position is None: # The agent is not available
+                continue
+            distance_other_agent =np.abs(position[0] - nearest_target[0])\
+                + np.abs(position[1] - nearest_target[1])
+            if (distance_self>distance_other_agent) \
+                or (distance_self==distance_other_agent and self.unique_id<agent_id) :
+                # The agent has priority on the waste, but he might be focused on something else
+                distances = np.abs(target_positions[:, 0] - position[0]) + np.abs(target_positions[:, 1] - position[1])
+                i=np.argmin(distances)
+                if (nearest_target == target_positions[i]).all():
+                    return False
+        return True
+
+    def get_assigned_target(self):
+       x,y = self.knowledge.position
+       color_code = COLOR_CODE[self.color]
+       targets = self.knowledge.target_positions[:,:,color_code]
+
+       target_positions_arr = np.argwhere(targets > 0)
+       
+       distances = list(np.abs(target_positions_arr[:, 0] - x) + np.abs(target_positions_arr[:, 1] - y))
+       target_positions = list(target_positions_arr)
+       while len(distances)>0:
+           i=np.argmin(distances)
+           nearest_target = target_positions[i]
+           if self.target_is_free(nearest_target, distances[i], target_positions_arr):
+               return nearest_target
+           distances.pop(i)
+           target_positions.pop(i)
+       return None
+    
+    def get_exploratory_target(self):
+        x,y = self.knowledge.position
+        color_code = COLOR_CODE[self.color]
+        x_min, x_end, y_min, y_end=self.knowledge.my_zone
+        targets = self.knowledge.target_positions[x_min:x_end+1,:,color_code]
+        target_positions_arr = np.argwhere(targets < 0)
+        distances = list(np.abs(target_positions_arr[:, 0] - x) + np.abs(target_positions_arr[:, 1] - y))
+        target_positions=list(target_positions_arr)
+
+        while len(distances)>0:
+           i=np.argmin(distances)
+           nearest_target = target_positions[i]
+           if self.target_is_free(nearest_target, distances[i], target_positions_arr):
+               return nearest_target
+           distances.pop(i)
+           target_positions.pop(i)
+        return None
+    
+    def go_to(self, target):
+        target_x, target_y = target
+        x,y = self.knowledge.position
+        if target_x < x:
+            return 'MOVE LEFT'
+        elif target_x > x:
+            return 'MOVE RIGHT'
+        elif target_y < y:
+            return 'MOVE DOWN'
+        elif target_y > y:
+            return 'MOVE UP'
+        
     # corresponds to the “reasoning” step of the agent. It takes as input the “knowledge” 
     def deliberate(self):
+        if self.strategy<3:
+            action=self.deliberate_v2()
+        else:
+            action=self.deliberate_v3()
+        return action
+
+
+    def deliberate_v2(self):
        if len(self.waste_carried)==2 and self.color!='red':
            return 'TRANSFORM'
        elif not self.available and self.is_at_limit():
@@ -57,7 +138,7 @@ class Robot(Agent):
           return 'PICKUP'
        
        target_positions = np.argwhere(targets > 0)
-
+       
        if target_positions.size == 0:
            return 'MOVE'
        
@@ -73,11 +154,41 @@ class Robot(Agent):
            return 'MOVE DOWN'
        elif target_y > y:
            return 'MOVE UP'
-            
+
+    def deliberate_v3(self):
+        if len(self.waste_carried)==2:
+            return 'TRANSFORM'
+        elif not self.available and self.is_at_limit():
+            return 'PUTDOWN'
+        elif not self.available:
+            return 'MOVE RIGHT'
+       
+        assigned_target=self.get_assigned_target()
+
+        if assigned_target is not None \
+            and assigned_target[0]==self.knowledge.position[0] \
+            and assigned_target[1]==self.knowledge.position[1]:
+            return 'PICKUP'
+        
+        if assigned_target is not None:
+            return self.go_to(assigned_target)
+        
+        assigned_target=self.get_exploratory_target()
+        if assigned_target is not None and not (assigned_target==self.knowledge.position).all():
+            return self.go_to(assigned_target)
+        
+        return "NONE"
+
     def step_agent(self): 
         action = self.deliberate()
         percepts = self.model.do(self, action)
         self.update(percepts)
+
+        # Communication with other agents
+        if self.strategy>1:
+            for agent in self.model.agents:
+                if isinstance(agent, Robot):
+                    agent.update(percepts)
 
     def get_possible_moves(self):
         possible_moves = []
@@ -92,7 +203,7 @@ class Robot(Agent):
         if y < y_end:
             possible_moves.append((x, y+1))
         return possible_moves
-     
+
     def get_logical_moves(self):
         possible_moves = []
         x,y=self.knowledge.position
@@ -133,8 +244,7 @@ class Robot(Agent):
        self.waste_carried.append(obj)
        if len(self.waste_carried)==2 or self.color=='red':
            self.available=False
-           
-   
+
     def transform(self, new_waste):
         self.waste_carried = [new_waste]
     
@@ -144,36 +254,36 @@ class Robot(Agent):
 
 
 class greenAgent(Robot):
-    def __init__(self, model: Model):
+    def __init__(self, model: Model, strategy=3):
         width, height = model.width, model.height
         my_zone = (0, width // 3 - 1, 0, height - 1)
         allowed_zone = (0, width // 3 - 1, 0, height - 1)
         position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
-        target_positions = np.zeros((width, height, 3), dtype=int)
-        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone, actions=[])
-        super().__init__(model, knowledge, 'green')
+        target_positions = -np.ones((width, height, 3), dtype=int)
+        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone)
+        super().__init__(model, knowledge, 'green', strategy)
 
 class yellowAgent(Robot):
-    def __init__(self, model: Model):
+    def __init__(self, model: Model, strategy=3):
         width, height = model.width, model.height
         my_zone = (width // 3, 2 * width // 3 - 1, 0, height - 1)
         allowed_zone = (0, 2 * width // 3 - 1, 0, height - 1)
         position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
-        target_positions = np.zeros((width, height, 3), dtype=int)
-        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone, actions=[])
-        super().__init__(model, knowledge, 'yellow')
+        target_positions = -np.ones((width, height, 3), dtype=int)
+        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone)
+        super().__init__(model, knowledge, 'yellow', strategy)
 
 class redAgent(Robot):
-    def __init__(self, model: Model):
+    def __init__(self, model: Model, strategy=3):
         width, height = model.width, model.height
         my_zone = (2 * width // 3, width - 1, 0, height - 1)
         allowed_zone = (0, width - 1, 0, height - 1)
         position = (random.randint(my_zone[0], my_zone[1]), random.randint(my_zone[2], my_zone[3]))
-        target_positions = np.zeros((width, height, 3), dtype=int)
-        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone, actions=[])
-        super().__init__(model, knowledge, 'red')
+        target_positions = -np.ones((width, height, 3), dtype=int)
+        knowledge = Knowledge(position=position, target_positions=target_positions, my_zone=my_zone, allowed_zone=allowed_zone)
+        super().__init__(model, knowledge, 'red', strategy)
 
-    def deliberate(self):
+    def deliberate_v2(self):
        x_min, x_end, y_min, y_end = self.knowledge.my_zone
        waste_disposal = (x_end, (y_end+1)//2)
        x, y = self.knowledge.position
@@ -181,11 +291,7 @@ class redAgent(Robot):
        if not self.available:
            if self.knowledge.position == waste_disposal:
                return 'PUTDOWN'
-           if x<x_end:
-               return 'MOVE RIGHT'
-           if y>waste_disposal[1]:
-               return 'MOVE DOWN'
-           return 'MOVE UP'
+           return self.go_to(waste_disposal)
        
        color_code = COLOR_CODE[self.color]
        targets = self.knowledge.target_positions[:,:,color_code]
@@ -210,3 +316,27 @@ class redAgent(Robot):
            return 'MOVE DOWN'
        elif target_y > y:
            return 'MOVE UP'
+       
+    def deliberate_v3(self):
+        x_min, x_end, y_min, y_end = self.knowledge.my_zone
+        waste_disposal = (x_end, (y_end+1)//2)
+
+        if not self.available:
+            if self.knowledge.position == waste_disposal:
+                return 'PUTDOWN'
+            return self.go_to(waste_disposal)
+
+        assigned_target=self.get_assigned_target()
+        if assigned_target is not None \
+            and assigned_target[0]==self.knowledge.position[0] \
+            and assigned_target[1]==self.knowledge.position[1]:
+            return 'PICKUP'
+
+        if assigned_target is not None:
+            return self.go_to(assigned_target)
+
+        assigned_target=self.get_exploratory_target()
+        if assigned_target is not None and not (assigned_target==self.knowledge.position).all():
+            return self.go_to(assigned_target)
+
+        return "NONE"

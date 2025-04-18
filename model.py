@@ -7,7 +7,7 @@ import mesa
 from metrics import *
 
 class RobotMission(Model):
-    def __init__(self, n_g, n_y, n_r, n_waste, width=10, height=10, seed=None):
+    def __init__(self, n_g, n_y, n_r, n_waste, width=10, height=10, seed=None, strategy=2):
         super().__init__(seed=seed)
         self.width = width 
         self.height = height
@@ -26,7 +26,7 @@ class RobotMission(Model):
         }
         for agent_type, num_agents in agent_mapping.items():
             for _ in range(num_agents):
-                agent = agent_type(self)
+                agent = agent_type(self, strategy)
                 self.grid.place_agent(agent, agent.knowledge.position)
         
         ## place waste
@@ -85,18 +85,20 @@ class RobotMission(Model):
             new_position = (x, y-1)
         elif action == "MOVE UP":
             new_position = (x, y+1)
-        else:
+        elif action!="NONE":
             print('No action')
-            raise Exception('no action')
+            raise Exception(f'no action {action}')
         
         new_position = self.move_agent(agent, new_position)
         
-        percepts = {
+        percepts_waste = {
                     neighbor_pos: [obj.radioactivity_level for obj in self.grid.get_cell_list_contents([neighbor_pos])
                                    if (isinstance(obj, Waste) and obj.active)]
                     for neighbor_pos in self.grid.get_neighborhood(new_position, moore=False, include_center=True)
                 }
-
+        
+        percepts_agent = [agent, new_position]
+        percepts = {'agent': percepts_agent, 'waste': percepts_waste}
         return percepts
 
     def get_all_agents_positions(self):
@@ -106,7 +108,8 @@ class RobotMission(Model):
         if len(agent.waste_carried)==1:
             waste = agent.waste_carried[0]
             agent.putdown(waste)
-        if waste.pos is not None and agent.pos==(self.width-1, self.height//2):
+        
+        if agent.pos==(self.width-1, self.height//2):
             self.grid.remove_agent(waste)
 
     def move_agent(self, agent, new_position):
@@ -121,7 +124,7 @@ class RobotMission(Model):
 
     def pickup(self, agent):
         contents = self.grid.get_cell_list_contents([agent.knowledge.position])
-        waste = [w for w in contents if isinstance(w, Waste) and w.radioactivity_level==agent.color]
+        waste = [w for w in contents if isinstance(w, Waste) and w.radioactivity_level==agent.color and w.active]
         if len(waste)>0 and agent.available:
             agent.pickup(waste[0])
             waste[0].active=False
