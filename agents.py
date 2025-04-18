@@ -14,7 +14,6 @@ class Knowledge(BaseModel):
    my_zone:Tuple[int, int, int, int] # x_min, x_end, y_min, y_end
    allowed_zone:Tuple[int, int, int, int]
    available_agents_pos:dict={'green':{}, 'yellow':{}, 'red':{}}
-   actions:List[str]=[] # list of actions
    reset_zone:bool=True
    model_config = ConfigDict(arbitrary_types_allowed=True)
 
