@@ -1,13 +1,3 @@
-#### Efficiency / Performance Metrics
-# Total waste disposed through time
-# Total green waste moved through time (or just the time when the green zone is empty)
-# Total yellow waste moved through time (or just the time when the yellow zone is empty)
-# Total red waste moved through time (or just the time when the red zone is empty)
-# Time spent not performing useful work
-
-#### Robustness
-# Variance across multiple simulation runs
-
 from objects import WasteDisposalZone, Waste
 
 

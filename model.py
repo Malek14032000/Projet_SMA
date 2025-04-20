@@ -54,7 +54,7 @@ class RobotMission(Model):
                 else:
                     self.grid.place_agent(Radioactivity(self, (x,y), "red"), (x,y))
         
-        
+        ## collect useful data for our analysis later
         self.datacollector = mesa.DataCollector(
             model_reporters={
         "Total_waste_disposed": compute_disposed_waste,
@@ -69,8 +69,10 @@ class RobotMission(Model):
         self.agents.shuffle_do("step_agent")
         self.datacollector.collect(self)
         
-    #  inform the environment of its actions
-    def do(self, agent:Robot, action):   
+
+    def do(self, agent:Robot, action):  
+        """Perform an action and return the percepts.""" 
+        
         new_position=None      
         x,y=agent.knowledge.position
 
@@ -106,10 +108,13 @@ class RobotMission(Model):
         percepts = {'agent': percepts_agent, 'waste': percepts_waste}
         return percepts
 
+
     def get_all_agents_positions(self):
         return [a.knowledge.position for a in self.agents]
     
+    
     def putdown(self, agent):
+        """Put down a waste on the grid."""
         if len(agent.waste_carried)>=1:
             waste = agent.waste_carried[0]
             waste.active=True
@@ -118,7 +123,9 @@ class RobotMission(Model):
         if agent.pos==(self.width-1, self.height//2):
             self.grid.remove_agent(waste)
 
+
     def move_agent(self, agent, new_position):
+        """Move the agent to a new position if it's valid."""
         if new_position in agent.get_possible_moves():
             self.grid.move_agent(agent, new_position)
             agent.knowledge.position=new_position
@@ -128,14 +135,18 @@ class RobotMission(Model):
             new_position=agent.knowledge.position
         return new_position
 
+
     def pickup(self, agent):
+        """Pick up waste if available in the current cell."""
         contents = self.grid.get_cell_list_contents([agent.knowledge.position])
         waste = [w for w in contents if isinstance(w, Waste) and w.radioactivity_level==agent.color and w.active]
         if len(waste)>0 and agent.available:
             agent.pickup(waste[0])
             waste[0].active=False
 
+
     def transform(self, agent):
+        """Transform waste according to the transformation rule: 2green=1yellow and 2yellow=1red."""
         assert len(agent.waste_carried)==2
         for w in agent.waste_carried:
             assert w.radioactivity_level==agent.color
@@ -144,7 +155,10 @@ class RobotMission(Model):
         new_waste = Waste(self, CODE_COLOR[1 + COLOR_CODE[agent.color]])
         self.grid.place_agent(new_waste, agent.knowledge.position)
         agent.transform(new_waste)
+
+
     def count_waste(self, color):
+        """Count the number of waste agents of a specific color in the grid."""
         count = 0
         for contents, (x, y) in self.grid.coord_iter():
             for agent in contents:

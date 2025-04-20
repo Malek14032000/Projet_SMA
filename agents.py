@@ -29,6 +29,7 @@ class Robot(Agent):
 
     #  allows the agent to get information from the environment.
     def update(self, percepts):
+        """Collects information from the environment."""
         for position, contents in percepts['waste'].items():
             x,y=position
             waste = [0,0,0]
@@ -44,11 +45,13 @@ class Robot(Agent):
         self.knowledge.available_agents_pos[agent.color][agent_id]=position
           
     def is_at_limit(self):
+        """Check if the agent is at the limit of its zone."""
         x,y=self.knowledge.position
         x_min, x_end, y_min, y_end = self.knowledge.my_zone
         return x==x_end
     
     def target_is_free(self, nearest_target, distance_self, target_positions):
+        """Check if the target is free."""
         for agent_id, position in self.knowledge.available_agents_pos[self.color].items():
             if position is None: # The agent is not available
                 continue
@@ -64,6 +67,7 @@ class Robot(Agent):
         return True
 
     def get_assigned_target(self):
+       """Get the assigned target for the agent."""
        x,y = self.knowledge.position
        color_code = COLOR_CODE[self.color]
        targets = self.knowledge.target_positions[:,:,color_code]
@@ -82,6 +86,7 @@ class Robot(Agent):
        return None
     
     def get_exploratory_target(self):
+        """Get the exploratory target for the agent."""
         x,y = self.knowledge.position
         color_code = COLOR_CODE[self.color]
         x_min, x_end, y_min, y_end=self.knowledge.my_zone
@@ -100,6 +105,7 @@ class Robot(Agent):
         return None
     
     def go_to(self, target):
+        """Move towards the target."""
         target_x, target_y = target
         x,y = self.knowledge.position
         if target_x < x:
@@ -111,8 +117,9 @@ class Robot(Agent):
         elif target_y > y:
             return 'MOVE UP'
         
-    # corresponds to the “reasoning” step of the agent. It takes as input the “knowledge” 
+    
     def deliberate(self):
+        """Decide the next action. Corresponds to the “reasoning” step of the agent. It takes as input the “knowledge” """
         if self.strategy<3:
             action=self.deliberate_v2()
         else:
@@ -120,6 +127,7 @@ class Robot(Agent):
         return action
 
     def deliberate_v2(self):
+        
        if len(self.waste_carried)==2 and self.color!='red':
            return 'TRANSFORM'
        elif not self.available and self.is_at_limit():
@@ -174,6 +182,7 @@ class Robot(Agent):
         return self.gather_remaining_waste()
 
     def gather_remaining_waste(self):
+        """Gather the remaining waste."""
         # the grid is known and empty
         targets = self.knowledge.target_positions[:,:,COLOR_CODE[self.color]]
         empty = (targets == 0).all()

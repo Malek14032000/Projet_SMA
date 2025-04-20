@@ -28,7 +28,6 @@ class Waste(Agent):
         self.radioactivity_level = radioactivity_level
         self.active = True # is not carried
 
-
         if radioactivity_level == "green":
             x_range = (0, width // 3 - 1)
         elif radioactivity_level == "yellow":
