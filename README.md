@@ -192,6 +192,10 @@ Increasing the number of agents per zone clearly reduces the time spent cleaning
 
 We clearly see that the agent following the strategy 2 perform better thant agents following strategy 1. And agents following strategy 3 are the best among all.
 
+ ❗️ **Note on Simulation Metrics** :
+In some configurations with  2 or 3 agents per zone, the simulation did not always complete. This occurred when each agent picked up one waste item at the end of the cleaning cycle, preventing further transformation into red waste and final disposal.
+As a result, we were unable to collect full metric data for these cases, and they were excluded from the final analysis.
+
 ####  Interpretation of the results: 
 
 In fact, in the first strategy, agents move greedily to discover their region. So they take more time discovering their zone. As the agents do not communicate between each others, the agents in the same zone will not collaborate. Even though increasing the number of agents reduces the time spent cleaning the grid, this time reduction is not related to the implementation of strategy 1.
@@ -205,13 +209,16 @@ In the third strategy, agents communicate just like in strategy 2, however this 
 ## Limits & Improvements
 In this project, we implemented and benchmarked three distinct behavior strategies for the agents. However, our methodology has a few limitations:
 
-- The simulation currently operates on a grid with a fixed size and fixed regions, which limits flexibility for testing in different environments.
+- The simulation currently operates on a grid with a fixed size (12x12) and fixed regions, which limits flexibility for testing in different environments.
 
 - Although we ran multiple simulations per configuration to reduce the variance, the overall batch size remains small, making our results not reliable enough.
 
 - We could enhance our monitoring by introducing additional performance indicators, such as the time an agent spents not performing any useful action. This would help clarify our optimization goals — are we aiming solely for fast map cleaning, or do we also want to minimize energy/resource usage?
 
 - In our implementation, each of the three zones contains the same amount of waste. However, this causes an imbalance since the red zone ends up being consistently overloaded compared to the others. A potential improvement would be to vary the waste density across zones and observe how it impacts the overall efficiency.
+
+- In some configurations, the simulation may get stuck when each agent holds one waste item, preventing further transformations. Handling this edge case could improve reliability and robustness.
+
 
 ## Contributors
 
