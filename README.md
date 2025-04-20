@@ -73,7 +73,10 @@ Ensure the following tools and libraries are installed:
     ```
 
 4. Visualisation: 
-Once the simulation starts, a browser-based visualization will automatically open to allow you to observe the robots' activities in real-time. You can set up your own configuration by modifying the parameters `number of green agents`, `number of yellow agents`, `number of red agents` and  `number of waste`. When you press the **play button**, the simulation will start: on the left, the agents will start moving in the grid, on the right the monitoring metrics will evolve through the steps. As metrics we chose : the number of total waste disposed through time, the total number of green waste moved through time, the total number ofyellow waste moved through time and the the number of total red waste moved through time. Below is a screenshot of the UI, implemented using solora.
+
+Once the simulation starts, a browser-based visualization will automatically open to allow you to observe the robots' activities in real-time. You can set up your own configuration by modifying the parameters `number of green agents`, `number of yellow agents`, `number of red agents` and  `number of waste`. 
+
+Pressing the **play button** will initiate the simulation. On the left side of the screen, agents begin navigating the grid, while on the right, key monitoring metrics dynamically update over time. The tracked metrics include: **the total amount of waste disposed over time**, **the amount of green waste moved**, **yellow waste moved**, and **red waste moved**. Below is a screenshot of the user interface, developed using Solora.
 
 **TODO: mettre un screenshot de la page solora**
 
@@ -81,7 +84,7 @@ Once the simulation starts, a browser-based visualization will automatically ope
 
 In this project, we experimented 3 strategies of agent behaviours. We will explain each one of them below and present the comparaison results in the next section.
 
-#### **Agents class inheritance**
+### **Agents class inheritance**
 The following UML class diagram is explains the inheritance links between all different types of agents we will present later. It is the same for the 3 strategies.
 ```
                Agent (mesa)
@@ -92,7 +95,7 @@ GreenAgent  YellowAgent  RedAgent
 ```
 All moving agents inherent from class `Robot`, present in `agents.py` module. This class contains an argument named `strategy` that allows us to choose the strategy `1`, `2` or `3`.
 
-#### **Agents knowledge**
+### **Agents knowledge**
 The `Knowledge` class, also present in `agents.py` module, represents the knowledge of an agent and its state during the simulation. Its main attributes are:
 
 - `position`: represents the current position of the agent.
@@ -101,36 +104,44 @@ The `Knowledge` class, also present in `agents.py` module, represents the knowle
 - `allowed_zone`: represents the coordinates of the corners of the allowed zone for the agent. In fact, the green agent can only move in the green zone, the yellow agent can move in the green and the yellow zones, and finally the red agent can move in all 3 zones.
 - `available_agents_pos`: only used when agents communicate. This allows each agent to know where the other agents, green/yellow/red, are in the grid.
 
-### Strategy 1 : Agents with no communication, moving greedily
+### **Implemented strategies**
 
-In this first approach, we made the following choices:
-- agents move greedily in the grid (move to the next column in the grid only after having moved in all cells in the previous column)
-- agents cannot communicate between each other. 
-- if sees something goes back to it directly 
+#### <u> Strategy 1 : Agents with no communication, moving greedily </u>
+In this initial approach, we adopted the following setup:
 
+- Agents move greedily through the grid, progressing to the next column only after covering all cells in the current one.
 
+- Agents do not communicate with each other.
 
-
-
-
-### Strategy 2 : Agents with communication
-- greedy
-- a une meilleur vue car ils communiquent et donc va à des endroits que les autres ont vu quelque chose. et si un waste a été pris, ça s'update pour tout les agents. ici y a juste un risque que deux agents vont aux meme endroit et comme ça on perd du temps
+- If an agent detects waste, it immediately returns to pick it up.
 
 
-### Strategy 3 : Agents with advanced communication
+#### <u> Strategy 2 : Agents with communication </u>
+This strategy builds upon the first by adding communication between agents:
 
-- même strategy que 2 sauf on ajoute que les agents quand ils communiquent, le plus proche qu waste vu, va au waste et si y a deux qui sont equidistant, il y a un autre de priorité. l'agent qui a l'id le plus bas va le prendre et l'autre cherche un autre.
-.....
+- Agents still follow a greedy movement pattern.
+
+- Communication allows agents to share information about waste locations. If one agent spots waste, all others are informed.
+
+- Once waste is collected, all agents update their knowledge accordingly.
+
+In this strategy, we do not deal with the case where multiple agents head to the same location. (this will be implemented in strategy 3 to reduce inefficiency of agents)
+
+#### <u> Strategy 3 : Agents with communication and coordination</u>
+This approach refines the previous one by improving coordination:
+
+- Agents communicate waste locations just as in Strategy 2.
+
+- The agent closest to a detected waste is assigned to retrieve it.
+
+- If multiple agents are equidistant from the waste, a priority system based on agent ID resolves the conflict—the agent with the lowest ID takes the task, while the others seek alternatives.
 
 ## Results
 We ran the simulations using a `batch_size` of 3  to take into account the randomness in both waste placement and the behavior of the chosen strategy. For each configuration, we varied the number of waste items and agents per zone. Then, we ran the simulation multiple times (equal to the batch size) and computed the average time taken to fully clean the grid.
 
-- **TODO: explain table !!!**
-
 - **TODO: show table !!!**
 
-#### Analysis of the results:
+#### <u> Analysis of the results: </u>
 
 Increasing the number of waste, increases naturally the time spent collecting the waste.
 
@@ -138,7 +149,7 @@ Increasing the number of agents per zone clearly reduces the time spent cleaning
 
 We clearly see that the agent following the strategy 2 perform better thant agents following strategy 1. And agents following strategy 3 are the best among all.
 
-#### Interpretation of the results:
+#### <u> Interpretation of the results: </u>
 
 In fact, in the first strategy, agents move greedily to discover their region. So they take more time discovering their zone. As the agents do not communicate between each others, the agents in the same zone will not collaborate. Even though increasing the number of agents reduces the time spent cleaning the grid, this time reduction is not related to the implementation of strategy 1.
 
