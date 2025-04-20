@@ -34,9 +34,6 @@ This project simulates a multi-agent system where robots cooperate to clean haza
   - Perception, deliberation, and action cycles for autonomous decision-making.  
   - Communication capabilities between robots for improved collaboration.  
 
-- **Visualization:**  
-  - Real-time simulation with an interactive visualization to observe robot behaviors and waste processing in action.
-
 ## Structure
 
   - `agents.py`: Agents implementation.
@@ -78,7 +75,9 @@ Once the simulation starts, a browser-based visualization will automatically ope
 
 Pressing the **play button** will initiate the simulation. On the left side of the screen, agents begin navigating the grid, while on the right, key monitoring metrics dynamically update over time. The tracked metrics include: **the total amount of waste disposed over time**, **the amount of green waste moved**, **yellow waste moved**, and **red waste moved**. Below is a screenshot of the user interface, developed using Solora.
 
-**TODO: mettre un screenshot de la page solora**
+<p align="center">
+<img src="figures/page.png" alt="Strategy 1" width="800"/>
+</p>
 
 ## Methodology
 
@@ -147,7 +146,7 @@ This approach refines the previous one by improving coordination:
 ## Results
 We fist ran one simulation to observe the evolution and the tendancies of the mectrics we chose to monitor.
 <p align="center">
-<img src="figures/metrics.png" alt="metrics" width="700"/>
+<img src="figures/metrics.png" alt="metrics" width="800"/>
 </p>
 
 **TODO: comments on the plots**

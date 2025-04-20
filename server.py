@@ -5,12 +5,13 @@ from mesa.visualization.utils import update_counter
 from model import RobotMission
 from agents import greenAgent, yellowAgent, redAgent
 from objects import Radioactivity, WasteDisposalZone, Waste
-
+from matplotlib.ticker import MaxNLocator
+    
 # === Visualisation des agents ===
 def agent_portrayal(agent): 
     if isinstance(agent, Radioactivity):
         color = {"green": "#C7F6C7", "yellow": "#FFFDD0", "red": "#F19396"}[agent.color]
-        return {"size": 1650, "color": color, "marker": "s", "zorder": 0}
+        return {"size": 1100, "color": color, "marker": "s", "zorder": 0}
     elif isinstance(agent, (greenAgent, yellowAgent, redAgent)):
         color_map = {
             greenAgent: "#00C000",
@@ -19,7 +20,7 @@ def agent_portrayal(agent):
         }
         return {"size": 800, "color": color_map[type(agent)], "marker": ".", "zorder": 1}
     elif isinstance(agent, WasteDisposalZone):
-        return {"size": 1450, "color": "black", "marker": "s", "zorder": 1}
+        return {"size": 1100, "color": "black", "marker": "s", "zorder": 1}
     elif isinstance(agent, Waste):
         color = {"green": "#2FF924", "yellow": "#AC9F3C", "red": "#EB212E"}[agent.radioactivity_level]
         return {"size": 60, "color": color, "marker": "s", "zorder": 1}
@@ -70,7 +71,7 @@ def WasteSinglePlot(model, color: str, label: str, line_color: str):
     ax.set_xlabel("Step")
     ax.set_ylabel("Quantité")
     ax.tick_params(axis='both', labelsize=20)
-    from matplotlib.ticker import MaxNLocator
+
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     ax.legend()
@@ -102,15 +103,15 @@ def WasteDisposedPlot(model):
 
 @solara.component
 def WastePlotsAll(model):
-    solara.Markdown("### Decomposed Waste Metrics Over Time")
+    #solara.Markdown("### Decomposed Waste Metrics Over Time")
     with solara.GridFixed(columns=2):
-        with solara.Card():  # tu peux aussi mettre les plots dans une card
+        with solara.Card(elevation=0, margin=-2):  # tu peux aussi mettre les plots dans une card
             WasteSinglePlot(model, "green", "Green Waste", "green")
-        with solara.Card():
+        with solara.Card(elevation=0, margin=-2):
             WasteSinglePlot(model, "yellow", "Yellow Waste", "#DAA520")
-        with solara.Card():
+        with solara.Card(elevation=0, margin=-2):
             WasteSinglePlot(model, "red", "Red Waste", "red")
-        with solara.Card():
+        with solara.Card(elevation=0, margin=-2):
             WasteDisposedPlot(model)
        
 
@@ -147,7 +148,7 @@ def Page():
 
 
         with solara.Column():
-            solara.Markdown("### Simulation")
+            solara.Markdown("<h3 style='text-align: center;'> Spatial and Temporal Dynamics </h3>")
             SolaraViz(
                 model,
                 model_params={key: val.value for key, val in model_params.items()},
