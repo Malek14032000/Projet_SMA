@@ -56,7 +56,12 @@ class RobotMission(Model):
         
         
         self.datacollector = mesa.DataCollector(
-            model_reporters={"Total_waste_disposed": compute_disposed_waste, "Left_waste_green": lambda m: transformed_waste_in_region(m, 'green')})
+            model_reporters={
+        "Total_waste_disposed": compute_disposed_waste,
+        "Left_waste_green": lambda m: m.count_waste("green"),
+        "Left_waste_yellow": lambda m: m.count_waste("yellow"),
+        "Left_waste_red": lambda m: m.count_waste("red")
+    })
         
         self.datacollector.collect(self)
             
@@ -139,3 +144,10 @@ class RobotMission(Model):
         new_waste = Waste(self, CODE_COLOR[1 + COLOR_CODE[agent.color]])
         self.grid.place_agent(new_waste, agent.knowledge.position)
         agent.transform(new_waste)
+    def count_waste(self, color):
+        count = 0
+        for contents, (x, y) in self.grid.coord_iter():
+            for agent in contents:
+                if isinstance(agent, Waste) and agent.radioactivity_level == color and agent.active:
+                    count += 1
+        return count
