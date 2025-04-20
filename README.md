@@ -88,7 +88,7 @@ In this project, we experimented 3 strategies of agent behaviours. We will expla
 The following UML class diagram is explains the inheritance links between all different types of agents we will present later. It is the same for the 3 strategies.
 ```
                Agent (mesa)
-                 ↑ 
+                 ↑
                Robot
      ↑          ↑          ↑
 GreenAgent  YellowAgent  RedAgent
@@ -145,9 +145,16 @@ This approach refines the previous one by improving coordination:
 </p>
 
 ## Results
-We ran the simulations using a `batch_size` of 3  to take into account the randomness in both waste placement and the behavior of the chosen strategy. For each configuration, we varied the number of waste items and agents per zone. Then, we ran the simulation multiple times (equal to the batch size) and computed the average time taken to fully clean the grid.
+We fist ran one simulation to observe the evolution and the tendancies of the mectrics we chose to monitor.
+<p align="center">
+<img src="figures/metrics.png" alt="metrics" width="300"/>
+</p>
 
-- **TODO: show table !!!**
+**TODO: comments on the plots**
+
+We then ran multiple simulations and monitored those same metrics. We used a `batch_size` of 3  to take into account the randomness of the waste placement in the grid. For each configuration, we varied the number of waste items and agents per zone. The table below shows the configurations we chose. To compare between the strategies, we will only be using the metrics: `number of waste disposed`.
+
+**TODO: show table !!!**
 
 ####  Analysis of the results: 
 
