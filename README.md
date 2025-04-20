@@ -147,7 +147,7 @@ This approach refines the previous one by improving coordination:
 ## Results
 We fist ran one simulation to observe the evolution and the tendancies of the mectrics we chose to monitor.
 <p align="center">
-<img src="figures/metrics.png" alt="metrics" width="600"/>
+<img src="figures/metrics.png" alt="metrics" width="700"/>
 </p>
 
 **TODO: comments on the plots**
