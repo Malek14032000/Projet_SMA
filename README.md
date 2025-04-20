@@ -19,7 +19,7 @@ This project simulates a multi-agent system where robots cooperate to clean haza
 
 ### **Zones:**
 
-1. **Zone 1 (Low Radioactivity):** Contains green waste, accessible only to **Green Robots**.
+1. **Zone 1 (Low Radioactivity):** Contains green waste, accessible only to all agents.
 2. **Zone 2 (Medium Radioactivity):** Contains yellow waste, accessible to **Yellow** and **Red Robots**.
 3. **Zone 3 (High Radioactivity):** A storage area for fully processed waste, accessible only to **Red Robots**.
 
@@ -109,10 +109,9 @@ The `Knowledge` class, also present in `agents.py` module, represents the knowle
 In this initial approach, we adopted the following setup:
 
 - Agents move greedily through the grid, progressing to the next column only after covering all cells in the current one.
-
 - Agents do not communicate with each other.
-
 - If an agent detects waste, it immediately returns to pick it up.
+
 <p align="center">
 <img src="figures/strat1.png" alt="Strategy 1" width="400"/>
 </p>
@@ -121,12 +120,11 @@ In this initial approach, we adopted the following setup:
 This strategy builds upon the first by adding communication between agents:
 
 - Agents still follow a greedy movement pattern.
-
 - Communication allows agents to share information about waste locations. If one agent spots waste, all others are informed.
-
 - Once waste is collected, all agents update their knowledge accordingly.
 
 In this strategy, we do not deal with the case where multiple agents head to the same location. (This will be implemented in strategy 3 reducing inefficiency of agents)
+
 <p align="center">
 <img src="figures/strat2.png" alt="Strategy 2" width="400"/>
 </p>
@@ -181,7 +179,7 @@ It's also important to note that the amount of green waste reaches zero before y
 We then ran multiple simulations and monitored those same metrics. We used a batch_size of 3  to take into account the randomness of the waste placement in the grid. For each configuration, we varied the number of waste items and agents per zone. The table below shows the configurations we chose. To compare between the strategies, we will only be using the metrics: number_of_waste_disposed. 
 
 <p align="center">
-<img src="figures/table.png" alt="results" width="800"/>
+<img src="figures/tableau.png" alt="results" width="800"/>
 </p>
 
 ####  Analysis of the results: 
