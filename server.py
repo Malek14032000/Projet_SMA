@@ -18,7 +18,7 @@ def agent_portrayal(agent):
             color = "#FFFDD0" 
         elif agent.color == "red":
             color = "#F19396" 
-        size = 1650
+        size = 700
         marker = "s"
         zorder = 0  # to put it behind the other agents/objects
 
@@ -42,7 +42,7 @@ def agent_portrayal(agent):
 
     elif isinstance(agent, WasteDisposalZone):
         color = "black" 
-        size = 1650
+        size = 700
         marker = "s"
         zorder = 1 
     
@@ -54,7 +54,7 @@ def agent_portrayal(agent):
             color = "#AC9F3C"
         if radioactivity_level=='red':
             color = "#EB212E"
-        size = 60
+        size = 50
         marker = "s"
         zorder = 1 
     
@@ -68,7 +68,7 @@ model_params = {
     "n_g": 2,
     "n_y": 2,
     "n_r": 2,
-    "n_waste": 50,
+    "n_waste": 20,
     "width": 15,
     "height": 15,
 }
