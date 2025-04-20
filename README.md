@@ -74,7 +74,7 @@ Ensure the following tools and libraries are installed:
 
 4. Visualisation: 
 
-Once the simulation starts, a browser-based visualization will automatically open to allow you to observe the robots' activities in real-time. You can set up your own configuration by modifying the parameters `number of green agents`, `number of yellow agents`, `number of red agents` and  `number of waste`. 
+Once the simulation starts, a browser-based visualization will automatically open to allow you to observe the robots' activities in real-time. You can set up your own configuration by modifying the parameters `green agents`, `yellow agents`, `red agents` and  `number of waste`. 
 
 Pressing the **play button** will initiate the simulation. On the left side of the screen, agents begin navigating the grid, while on the right, key monitoring metrics dynamically update over time. The tracked metrics include: **the total amount of waste disposed over time**, **the amount of green waste moved**, **yellow waste moved**, and **red waste moved**. Below is a screenshot of the user interface, developed using Solora.
 

@@ -140,10 +140,10 @@ def Page():
     with solara.Columns([3, 9]):
         with solara.Column():
             solara.Markdown("### Model Parameters")
-            solara.SliderInt("Agents verts", value=n_g, min=0, max=10)
-            solara.SliderInt("Agents jaunes", value=n_y, min=0, max=10)
-            solara.SliderInt("Agents rouges", value=n_r, min=0, max=10)
-            solara.SliderInt("Nombre de déchets", value=n_waste, min=0, max=50)
+            solara.SliderInt("green agents", value=n_g, min=0, max=10)
+            solara.SliderInt("yellow agents", value=n_y, min=0, max=10)
+            solara.SliderInt("red agents", value=n_r, min=0, max=10)
+            solara.SliderInt("number of waste", value=n_waste, min=0, max=50)
 
 
         with solara.Column():
