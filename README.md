@@ -32,7 +32,7 @@ This project simulates a multi-agent system where robots cooperate to clean haza
 
 - **Agent Behaviors:**  
   - Perception, deliberation, and action cycles for autonomous decision-making.  
-  - Communication capabilities between robots for improved collaboration (this will be added in future steps).  
+  - Communication capabilities between robots for improved collaboration.  
 
 - **Visualization:**  
   - Real-time simulation with an interactive visualization to observe robot behaviors and waste processing in action.
@@ -106,7 +106,7 @@ The `Knowledge` class, also present in `agents.py` module, represents the knowle
 
 ### **Implemented strategies**
 
-#### <u> Strategy 1 : Agents with no communication, moving greedily </u>
+####  Strategy 1 : Agents with no communication, moving greedily 
 In this initial approach, we adopted the following setup:
 
 - Agents move greedily through the grid, progressing to the next column only after covering all cells in the current one.
@@ -114,9 +114,11 @@ In this initial approach, we adopted the following setup:
 - Agents do not communicate with each other.
 
 - If an agent detects waste, it immediately returns to pick it up.
+<p align="center">
+<img src="figures/strategy1.png" alt="Strategy 1" width="400"/>
+</p>
 
-
-#### <u> Strategy 2 : Agents with communication </u>
+####  Strategy 2 : Agents with communication 
 This strategy builds upon the first by adding communication between agents:
 
 - Agents still follow a greedy movement pattern.
@@ -125,9 +127,12 @@ This strategy builds upon the first by adding communication between agents:
 
 - Once waste is collected, all agents update their knowledge accordingly.
 
-In this strategy, we do not deal with the case where multiple agents head to the same location. (this will be implemented in strategy 3 to reduce inefficiency of agents)
+In this strategy, we do not deal with the case where multiple agents head to the same location. (This will be implemented in strategy 3 reducing inefficiency of agents)
+<p align="center">
+<img src="figures/strategy2.png" alt="Strategy 2" width="400"/>
+</p>
 
-#### <u> Strategy 3 : Agents with communication and coordination</u>
+#### Strategy 3 : Agents with communication and coordination
 This approach refines the previous one by improving coordination:
 
 - Agents communicate waste locations just as in Strategy 2.
@@ -135,13 +140,16 @@ This approach refines the previous one by improving coordination:
 - The agent closest to a detected waste is assigned to retrieve it.
 
 - If multiple agents are equidistant from the waste, a priority system based on agent ID resolves the conflict—the agent with the lowest ID takes the task, while the others seek alternatives.
+<p align="center">
+<img src="figures/strategy3.png" alt="Strategy 3" width="400"/>
+</p>
 
 ## Results
 We ran the simulations using a `batch_size` of 3  to take into account the randomness in both waste placement and the behavior of the chosen strategy. For each configuration, we varied the number of waste items and agents per zone. Then, we ran the simulation multiple times (equal to the batch size) and computed the average time taken to fully clean the grid.
 
 - **TODO: show table !!!**
 
-#### <u> Analysis of the results: </u>
+####  Analysis of the results: 
 
 Increasing the number of waste, increases naturally the time spent collecting the waste.
 
@@ -149,7 +157,7 @@ Increasing the number of agents per zone clearly reduces the time spent cleaning
 
 We clearly see that the agent following the strategy 2 perform better thant agents following strategy 1. And agents following strategy 3 are the best among all.
 
-#### <u> Interpretation of the results: </u>
+####  Interpretation of the results: 
 
 In fact, in the first strategy, agents move greedily to discover their region. So they take more time discovering their zone. As the agents do not communicate between each others, the agents in the same zone will not collaborate. Even though increasing the number of agents reduces the time spent cleaning the grid, this time reduction is not related to the implementation of strategy 1.
 
