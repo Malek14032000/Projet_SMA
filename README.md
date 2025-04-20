@@ -143,7 +143,7 @@ This approach refines the previous one by improving coordination:
 
 ## Results
 
-####  A sample simulation
+###  A Sample Simulation
 
 We fist ran one simulation to observe the evolution and the tendancies of the mectrics we chose to monitor.
 <p align="center">
@@ -154,29 +154,23 @@ We fist ran one simulation to observe the evolution and the tendancies of the me
 Each plot is displayed against the simulation steps, which represent discrete time units in the simulation. As the number of steps increases, the system progresses through the collection, transformation, and disposal cycles for each type of waste.
 
 🟩 **Green Waste over Time**
-
-
 The first plot shows a steady decrease in green waste over time. This is expected, as green agents constantly collect and transform green waste into yellow waste throughout the simulation. 
 
 🟨 **Yellow Waste over Time**
-
-
-The yellow waste plot exhibits a more irregular pattern, with sudden increases (peaks) followed by drops. These peaks correspond to the transformation of green waste into yellow waste — once green agents process green waste, it reappears as yellow waste, temporarily increasing the count. Yellow agents then collect and convert it into red waste.
+The yellow waste plot has a more irregular pattern, with sudden increases followed by drops. These peaks correspond to the transformation of green waste into yellow waste. In fact, once green agents process green waste, it reappears as yellow waste, temporarily increasing the count. Yellow agents then collect and convert it into red waste.
 
 🟥 **Red Waste over Time**
+Similarly, the red waste plot reflects the transformation of yellow waste into red. It also has peaks when new red waste is created, followed by decreases as red agents dispose of it in the final zone.
 
-Similarly, the red waste plot reflects the transformation of yellow waste into red. It also displays temporary increases when new red waste is created, followed by decreases as red agents dispose of it in the final zone.
 
-
-**Total Waste Disposed**
-
-the total waste disposed curve shows a smooth and regular upward trend, indicating a consistent progression toward cleaning the environment as red agents complete the final step of the waste lifecycle.
+⬛ **Total Waste Disposed**
+The total waste disposed curve shows a smooth and regular increasing trend. It shows that there is a continuous progression toward cleaning the map as red agents complete the final step of the waste lifecycle.
 
 
 It's also important to note that the amount of green waste reaches zero before yellow waste, and yellow waste disappears before red waste. This behavior is entirely consistent with the logic of the simulation: green waste must first be transformed into yellow, then yellow into red, and finally red waste is disposed of.
 
-####  Simulation Setup and Evaluation Metrics
-We then ran multiple simulations and monitored those same metrics. We used a batch_size of 3  to take into account the randomness of the waste placement in the grid. For each configuration, we varied the number of waste items and agents per zone. The table below shows the configurations we chose. To compare between the strategies, we will only be using the metrics: number_of_waste_disposed. 
+### Extended Simulations and Performance Comparison
+We then ran multiple simulations and monitored those same metrics. We used a `batch_size` of **3**  to take into account the randomness of the waste placement in the grid. For each configuration, we varied the number of waste items and agents per zone, however we fixed the grid size to be **12x12**. The table below shows the configurations we chose. To compare between the strategies, we will only be using the metric: `number_of_waste_disposed`. 
 
 <p align="center">
 <img src="figures/tableau.png" alt="results" width="800"/>
@@ -188,10 +182,9 @@ Increasing the number of waste, increases naturally the time spent collecting th
 
 Increasing the number of agents per zone clearly reduces the time spent cleaning the grid.
 
-We clearly see that the agent following the strategy 2 perform better thant agents following strategy 1. And agents following strategy 3 are the best among all.
+We clearly see that the agents following the strategy 2 perform better than agents following strategy 1. And agents following strategy 3 are the best among all.
 
- ❗️ **Note on Simulation Metrics** :
-In some configurations with  2 or 3 agents per zone, the simulation did not always complete. This occurred when each agent picked up one waste item at the end of the cleaning cycle, preventing further transformation into red waste and final disposal.
+❗️ **Note on Simulation Metrics** : In some configurations with  2 or 3 agents per zone, the simulation did not always complete. This occurred when each agent picked up one waste item at the end of the cleaning cycle, preventing further transformation into yellow/red waste and final disposal.
 As a result, we were unable to collect full metric data for these cases, and they were excluded from the final analysis.
 
 ####  Interpretation of the results: 
