@@ -28,7 +28,7 @@ def compute_disposed_waste(model):
         model.previous_n_waste = 0
     
     total_waste = n_waste + model.previous_n_waste
-    model.previous_n_waste = total_waste
+    model.previous_n_waste += total_waste
     
     return total_waste
 

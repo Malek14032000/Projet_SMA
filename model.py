@@ -15,6 +15,7 @@ class RobotMission(Model):
         self.num_yellow_agents = n_y
         self.num_red_agents = n_r
         self.num_waste = n_waste
+        self.running=True
         
         self.grid = MultiGrid(width, height, torus=False)
         
@@ -63,6 +64,13 @@ class RobotMission(Model):
     def step(self):
         self.agents.shuffle_do("step_agent")
         self.datacollector.collect(self)
+        n_waste=0
+        for objects, pos in self.grid.coord_iter():
+            for ob in objects:
+                if isinstance(ob, Waste):
+                    n_waste+=1
+        if n_waste==0:
+            self.running=False
         
     #  inform the environment of its actions
     def do(self, agent:Robot, action):   
@@ -109,9 +117,13 @@ class RobotMission(Model):
             waste = agent.waste_carried[0]
             waste.active=True
             agent.putdown(waste)
+        else:
+            return None
         
         if agent.pos==(self.width-1, self.height//2):
             self.grid.remove_agent(waste)
+
+            
 
     def move_agent(self, agent, new_position):
         if new_position in agent.get_possible_moves():
@@ -137,5 +149,6 @@ class RobotMission(Model):
             if w.pos is not None:
                 self.grid.remove_agent(w)
         new_waste = Waste(self, CODE_COLOR[1 + COLOR_CODE[agent.color]])
+        new_waste.active=False
         self.grid.place_agent(new_waste, agent.knowledge.position)
         agent.transform(new_waste)
