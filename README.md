@@ -1,4 +1,4 @@
-# 🤖 Self-organization of Robots in a Hostile Environment  
+# Self-organization of Robots in a Hostile Environment  
 
 This project simulates the mission of autonomous robots tasked with collecting, transforming, and transporting hazardous waste in a radioactive environment. The robots operate in three distinct zones, each with varying levels of radioactivity, and each robot type has specific capabilities and restrictions. This simulation uses a multi-agent system (MAS) to model collaborative behavior in a hostile environment.
 
@@ -37,7 +37,6 @@ This project simulates a multi-agent system where robots cooperate to clean haza
 - **Visualization:**  
   - Real-time simulation with an interactive visualization to observe robot behaviors and waste processing in action.
 
-
 ## Structure
 
   - `agents.py`: Agents implementation.
@@ -74,7 +73,9 @@ Ensure the following tools and libraries are installed:
     ```
 
 4. Visualisation: 
-Once the simulation starts, a browser-based visualization will automatically open to allow you to observe the robots' activities in real-time. You can set up your own configuration by modifying the parameters `number of green agents`, `number of yellow agents`, `number of red agents` and  `number of waste`.
+Once the simulation starts, a browser-based visualization will automatically open to allow you to observe the robots' activities in real-time. You can set up your own configuration by modifying the parameters `number of green agents`, `number of yellow agents`, `number of red agents` and  `number of waste`. When you press the **play button**, the simulation will start: on the left, the agents will start moving in the grid, on the right the monitoring metrics will evolve through the steps. As metrics we chose : the number of total waste disposed through time, the total number of green waste moved through time, the total number ofyellow waste moved through time and the the number of total red waste moved through time. Below is a screenshot of the UI, implemented using solora.
+
+**TODO: mettre un screenshot de la page solora**
 
 ## Methodology
 
@@ -125,16 +126,32 @@ In this first approach, we made the following choices:
 ## Results
 We ran the simulations using a `batch_size` of 3  to take into account the randomness in both waste placement and the behavior of the chosen strategy. For each configuration, we varied the number of waste items and agents per zone. Then, we ran the simulation multiple times (equal to the batch size) and computed the average time taken to fully clean the grid.
 
-- show table !!!
+- **TODO: explain table !!!**
 
-We clearly see that the agent following 
+- **TODO: show table !!!**
+
+#### Analysis of the results:
+
+Increasing the number of waste, increases naturally the time spent collecting the waste.
+
+Increasing the number of agents per zone clearly reduces the time spent cleaning the grid.
+
+We clearly see that the agent following the strategy 2 perform better thant agents following strategy 1. And agents following strategy 3 are the best among all.
+
+#### Interpretation of the results:
+
+In fact, in the first strategy, agents move greedily to discover their region. So they take more time discovering their zone. As the agents do not communicate between each others, the agents in the same zone will not collaborate. Even though increasing the number of agents reduces the time spent cleaning the grid, this time reduction is not related to the implementation of strategy 1.
+
+In the second strategy, agents communicate between each other. each one of them has an up-to-date vision of the discovered parts in the grid. So they will spend less time doing the greedy exploration, and their moves will be more targeted to closest known wastes. This way the cleaning will happen faster.
+
+In the third strategy, agents communicate just like in strategy 2, however this time, the agents in the same zonr are able to split tasks so that two agents don't target the same waste. In this strategy, as we make sure that each agent makes the right actions for the final goal, the time qpent cleaning will decrease. However, for this strategy to show its advantage, the number of agents need to be high, so that the possibility of having two or more agents targeting the same 
 
 
 
 ## Limits & Improvements
 In this project, we implemented and benchmarked three distinct behavior strategies for the agents. However, our methodology has a few limitations:
 
-- The simulation currently operates on a grid with a fixed size and fixed regions, which limits flexibility for testing in different environments. It would 
+- The simulation currently operates on a grid with a fixed size and fixed regions, which limits flexibility for testing in different environments.
 
 - Although we ran multiple simulations per configuration to reduce the variance, the overall batch size remains small, making our results not reliable enough.
 
