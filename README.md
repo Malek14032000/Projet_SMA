@@ -149,9 +149,31 @@ We fist ran one simulation to observe the evolution and the tendancies of the me
 <img src="figures/metrics.png" alt="metrics" width="800"/>
 </p>
 
-**TODO: comments on the plots**
 
-We then ran multiple simulations and monitored those same metrics. We used a `batch_size` of 3  to take into account the randomness of the waste placement in the grid. For each configuration, we varied the number of waste items and agents per zone. The table below shows the configurations we chose. To compare between the strategies, we will only be using the metrics: `number of waste disposed`.
+
+Each plot is displayed against the simulation steps, which represent discrete time units in the simulation. As the number of steps increases, the system progresses through the collection, transformation, and disposal cycles for each type of waste.
+
+🟩 **Green Waste over Time**
+
+
+The first plot shows a steady decrease in green waste over time. This is expected, as green agents constantly collect and transform green waste into yellow waste throughout the simulation. 
+
+🟨 **Yellow Waste over Time**
+
+
+The yellow waste plot exhibits a more irregular pattern, with sudden increases (peaks) followed by drops. These peaks correspond to the transformation of green waste into yellow waste — once green agents process green waste, it reappears as yellow waste, temporarily increasing the count. Yellow agents then collect and convert it into red waste.
+
+🟥 **Red Waste over Time**
+
+Similarly, the red waste plot reflects the transformation of yellow waste into red. It also displays temporary increases when new red waste is created, followed by decreases as red agents dispose of it in the final zone.
+
+
+**Total Waste Disposed**
+
+the total waste disposed curve shows a smooth and regular upward trend, indicating a consistent progression toward cleaning the environment as red agents complete the final step of the waste lifecycle.
+
+**🕒 Waste Transformation flow**
+It's also important to note that the amount of green waste reaches zero before yellow waste, and yellow waste disappears before red waste. This behavior is entirely consistent with the logic of the simulation: green waste must first be transformed into yellow, then yellow into red, and finally red waste is disposed of.
 
 **TODO: show table !!!**
 
