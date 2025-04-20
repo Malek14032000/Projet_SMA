@@ -115,7 +115,7 @@ In this initial approach, we adopted the following setup:
 
 - If an agent detects waste, it immediately returns to pick it up.
 <p align="center">
-<img src="figures/strategy1.png" alt="Strategy 1" width="400"/>
+<img src="figures/strat1.png" alt="Strategy 1" width="400"/>
 </p>
 
 ####  Strategy 2 : Agents with communication 
@@ -129,7 +129,7 @@ This strategy builds upon the first by adding communication between agents:
 
 In this strategy, we do not deal with the case where multiple agents head to the same location. (This will be implemented in strategy 3 reducing inefficiency of agents)
 <p align="center">
-<img src="figures/strategy2.png" alt="Strategy 2" width="400"/>
+<img src="figures/strat2.png" alt="Strategy 2" width="400"/>
 </p>
 
 #### Strategy 3 : Agents with communication and coordination
@@ -141,7 +141,7 @@ This approach refines the previous one by improving coordination:
 
 - If multiple agents are equidistant from the waste, a priority system based on agent ID resolves the conflict—the agent with the lowest ID takes the task, while the others seek alternatives.
 <p align="center">
-<img src="figures/strategy3.png" alt="Strategy 3" width="400"/>
+<img src="figures/strat3.png" alt="Strategy 3" width="400"/>
 </p>
 
 ## Results
