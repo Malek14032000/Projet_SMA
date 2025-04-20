@@ -114,9 +114,9 @@ In this initial approach, we adopted the following setup:
 - Agents do not communicate with each other.
 
 - If an agent detects waste, it immediately returns to pick it up.
-
-<img src="figures/strategy1.png" alt="Strategy 1" width="200"/>
-
+<p align="center">
+<img src="figures/strategy1.png" alt="Strategy 1" width="400"/>
+</p>
 
 ####  Strategy 2 : Agents with communication 
 This strategy builds upon the first by adding communication between agents:
@@ -128,8 +128,9 @@ This strategy builds upon the first by adding communication between agents:
 - Once waste is collected, all agents update their knowledge accordingly.
 
 In this strategy, we do not deal with the case where multiple agents head to the same location. (This will be implemented in strategy 3 reducing inefficiency of agents)
-
-<img src="figures/strategy2.png" alt="Strategy 2" width="200"/>
+<p align="center">
+<img src="figures/strategy2.png" alt="Strategy 2" width="400"/>
+</p>
 
 #### Strategy 3 : Agents with communication and coordination
 This approach refines the previous one by improving coordination:
@@ -139,8 +140,9 @@ This approach refines the previous one by improving coordination:
 - The agent closest to a detected waste is assigned to retrieve it.
 
 - If multiple agents are equidistant from the waste, a priority system based on agent ID resolves the conflict—the agent with the lowest ID takes the task, while the others seek alternatives.
-
-<img src="figures/strategy3.png" alt="Strategy 3" width="200"/>
+<p align="center">
+<img src="figures/strategy3.png" alt="Strategy 3" width="400"/>
+</p>
 
 ## Results
 We ran the simulations using a `batch_size` of 3  to take into account the randomness in both waste placement and the behavior of the chosen strategy. For each configuration, we varied the number of waste items and agents per zone. Then, we ran the simulation multiple times (equal to the batch size) and computed the average time taken to fully clean the grid.
