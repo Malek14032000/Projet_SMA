@@ -174,6 +174,8 @@ the total waste disposed curve shows a smooth and regular upward trend, indicati
 
 **🕒 Waste Transformation flow**
 It's also important to note that the amount of green waste reaches zero before yellow waste, and yellow waste disappears before red waste. This behavior is entirely consistent with the logic of the simulation: green waste must first be transformed into yellow, then yellow into red, and finally red waste is disposed of.
+#### 📊 Simulation Setup and Evaluation Metrics
+We then ran multiple simulations and monitored those same metrics. We used a batch_size of 3  to take into account the randomness of the waste placement in the grid. For each configuration, we varied the number of waste items and agents per zone. The table below shows the configurations we chose. To compare between the strategies, we will only be using the metrics: number_of_waste_disposed. 
 
 **TODO: show table !!!**
 
